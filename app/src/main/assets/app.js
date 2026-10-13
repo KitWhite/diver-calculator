@@ -777,6 +777,14 @@
     });
     each(document.querySelectorAll('input[inputmode]'), function (el) {
       el.addEventListener('keydown', function (e) { if (e.key === 'Enter') el.blur(); });
+      // При нажатии на поле значение выделяется целиком — новое число сразу заменяет старое.
+      // Тап после фокуса ставит курсор и снимает выделение, поэтому выделяем и после отпускания.
+      var justFocused = false;
+      function selectAll() { try { el.setSelectionRange(0, el.value.length); } catch (e) { el.select(); } }
+      el.addEventListener('focus', function () { justFocused = true; setTimeout(selectAll, 0); });
+      el.addEventListener('mouseup', function (e) { if (justFocused) { e.preventDefault(); selectAll(); justFocused = false; } });
+      el.addEventListener('touchend', function () { if (justFocused) setTimeout(selectAll, 0); });
+      el.addEventListener('blur', function () { justFocused = false; });
     });
     render();
   }
