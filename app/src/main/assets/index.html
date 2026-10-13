@@ -28,8 +28,9 @@ button{font:inherit;color:inherit}
 .brand{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
 .brand h1{font-size:19px;margin:0;letter-spacing:-.01em}
 .brand span{font-size:12.5px;color:var(--muted)}
-.tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:2px;margin:8px -8px 0}
-.tab{position:relative;border:0;background:none;padding:8px 2px 10px;border-bottom:3px solid transparent;cursor:pointer;color:var(--muted);text-align:center;min-height:52px}
+.tabs{display:flex;gap:2px;margin:8px -16px 0;padding:0 8px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.tabs::-webkit-scrollbar{display:none}
+.tab{position:relative;flex:1 0 auto;border:0;background:none;padding:8px 10px 10px;border-bottom:3px solid transparent;cursor:pointer;color:var(--muted);text-align:center;min-height:52px}
 .tab .n{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:var(--card2);font-size:12.5px;font-weight:700;margin-bottom:2px}
 .tab .t{display:block;font-size:12px;line-height:1.2;white-space:nowrap;letter-spacing:-.01em}
 .tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
@@ -212,6 +213,7 @@ footer{font-size:12.5px;color:var(--muted);line-height:1.5;margin-top:8px}
       <button class="tab" role="tab" id="tab2" data-tab="2" aria-controls="p2"><span class="n">2</span><span class="t">Декомпрессия</span><i class="dot hidden"></i></button>
       <button class="tab" role="tab" id="tab3" data-tab="3" aria-controls="p3"><span class="n">3</span><span class="t">Приготовление</span><i class="dot hidden"></i></button>
       <button class="tab" role="tab" id="tab4" data-tab="4" aria-controls="p4"><span class="n">4</span><span class="t">Смежные</span><i class="dot hidden"></i></button>
+      <button class="tab" role="tab" id="tab5" data-tab="5" aria-controls="p5"><span class="n">5</span><span class="t">Без декомпрессии</span><i class="dot hidden"></i></button>
     </div>
   </div>
 </div>
@@ -372,13 +374,22 @@ footer{font-size:12.5px;color:var(--muted);line-height:1.5;margin-top:8px}
   <h2 class="ttl">Смежные режимы</h2>
   <p class="sub" id="p4sub"></p>
   <div id="adjOut"></div>
-  <footer>
-    Таблицы — ПВС ВМФ-2002, приложение 4 (электронная копия). Найденные в копии опечатки исправлены
-    и помечены значком ⚠; в спорных случаях принят более длинный вариант. Приложение — вспомогательный
-    инструмент и не заменяет водолазного специалиста и врача-спецфизиолога. Смесь перед спуском
-    обязательно проверяется газоанализатором.
-  </footer>
+  <div class="next"><button type="button" class="btn" data-go="5">Без декомпрессии →</button></div>
 </section>
+
+<!-- 5. Без декомпрессии -->
+<section class="panel hidden" id="p5" role="tabpanel" aria-labelledby="tab5">
+  <h2 class="ttl">Без декомпрессии</h2>
+  <p class="sub" id="p5sub"></p>
+  <div id="ndOut"></div>
+</section>
+
+<footer>
+  Таблицы — ПВС ВМФ-2002, приложение 4 (электронная копия). Найденные в копии опечатки исправлены
+  и помечены значком ⚠; в спорных случаях принят более длинный вариант. Приложение — вспомогательный
+  инструмент и не заменяет водолазного специалиста и врача-спецфизиолога. Смесь перед спуском
+  обязательно проверяется газоанализатором.
+</footer>
 
 </div>
 

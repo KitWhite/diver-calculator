@@ -121,7 +121,7 @@
 
   // ---------- главная оценка ----------
   function evaluate() {
-    var R = { errs: { 1: [], 2: [], 3: [], 4: [] }, warns: { 1: [], 2: [], 3: [], 4: [] }, info: [] };
+    var R = { errs: { 1: [], 2: [], 3: [], 4: [], 5: [] }, warns: { 1: [], 2: [], 3: [], 4: [], 5: [] }, info: [] };
     var f = gasF(), D = num(S.depth), E = num(S.exp);
     R.f = f; R.D = D; R.E = E;
     var nitrox = S.gas === 'kas' || S.gas === 'kvs';
@@ -350,8 +350,18 @@
     renderP2(R);
     renderP3(R);
     renderP4(R);
+    renderP5(R);
     renderBar(R);
     save();
+  }
+
+  // Прокрутить полосу вкладок так, чтобы активная была видна целиком
+  function revealTab() {
+    var bar = document.querySelector('.tabs'), act = $('tab' + S.tab);
+    if (!bar || !act) return;
+    var l = act.offsetLeft - bar.offsetLeft, r = l + act.offsetWidth;
+    if (l < bar.scrollLeft) bar.scrollLeft = l - 8;
+    else if (r > bar.scrollLeft + bar.clientWidth) bar.scrollLeft = r - bar.clientWidth + 8;
   }
 
   function renderTabs(R) {
@@ -359,11 +369,12 @@
       var n = +b.getAttribute('data-tab');
       b.setAttribute('aria-selected', String(n === S.tab));
       var dot = b.querySelector('.dot');
-      var err = R.errs[n].length || (n === 4 && !R.ok) || (n === 3 && R.prep && R.prep.error);
+      var err = R.errs[n].length || ((n === 4 || n === 5) && !R.ok) || (n === 3 && R.prep && R.prep.error);
       var warn = R.warns[n].length;
       dot.className = 'dot' + (err ? ' err' : warn ? ' warn' : ' hidden');
     });
-    for (var i = 1; i <= 4; i++) $('p' + i).classList.toggle('hidden', i !== S.tab);
+    for (var i = 1; i <= 5; i++) $('p' + i).classList.toggle('hidden', i !== S.tab);
+    revealTab();
   }
 
   // --- 1. Смесь
@@ -682,6 +693,70 @@
     $('adjOut').innerHTML = h;
   }
 
+
+  // --- 5. Без декомпрессии
+  // Предел экспозиции без остановок с учётом сдвига по неблагоприятным факторам
+  function noStopLimit(rows, shift) {
+    var lim = null;
+    rows.forEach(function (r, i) {
+      var rr = rows[i + shift];
+      if (r.e !== null && rr && !rr.s.length && (!lim || r.e > lim.e)) lim = { e: r.e, tr: rr.tr };
+    });
+    return lim;
+  }
+  function renderP5(R) {
+    var h = '', nf = nFactors(), shift = Math.min(nf, 2);
+    var gl = S.gas === 'kas' || S.gas === 'kvs' ? GAS_NAME[S.gas] + ' ' + pct(R.f) : GAS_NAME[S.gas];
+    $('p5sub').textContent = gl + (R.D > 0 ? ' · ' + fmtIn(R.D) + NB + 'м' : '') + (R.t && TABLE_INFO[R.t] ? ' · ' + TABLE_INFO[R.t].split(' — ')[0] + (R.viaEAD ? ' по ЭВГ' : '') : '');
+    if (R.errs[1].length || (!R.rows && !R.o2 && R.errs[2].length)) {
+      $('ndOut').innerHTML = '<div class="msg err">Спуск недопустим. ' + cap((R.errs[1][0] || R.errs[2][0] || '').replace(/^Спуск недопустим:\s*/, '')) + '</div>';
+      return;
+    }
+    if (S.gas === 'o2') {
+      h += '<div class="msg info">Таблиц декомпрессии для кислорода в ПВС нет — ограничение одно: допустимое время дыхания кислородом.</div>';
+      if (R.o2) h += '<div class="hero"><div class="k">Допустимо на ' + R.o2.row.d + NB + 'м</div><div class="v">' + hmShort(R.o2.lim) + '<small>ч:мин</small></div><div class="s">' + (S.o2env === 'chamber' ? 'в барокамере' : R.o2.heavy ? 'тяжёлая работа' : 'лёгкая и средняя работа') + '</div></div>';
+      $('ndOut').innerHTML = h;
+      return;
+    }
+    if (R.t === 't5') {
+      var lim = noStopLimit(R.rows, shift);
+      if (lim) {
+        h += '<div class="hero"><div class="k">Без остановок на ' + R.depthLabel + '</div><div class="v">до ' + lim.e + '<small>мин</small></div>' +
+          '<div class="s">подъём на поверхность — ' + lim.tr + NB + 'мин · таблица 5, 40' + NB + '% КАС' + (shift ? ' · с учётом факторов' : '') + '</div></div>';
+        if (R.E > 0) h += R.E <= lim.e
+          ? '<div class="msg info"><b>✓ Запланировано ' + fmtIn(R.E) + NB + 'мин — спуск без декомпрессии:</b> подъём ' + lim.tr + NB + 'мин без остановок.</div>'
+          : '<div class="msg warn">Запланировано ' + fmtIn(R.E) + NB + 'мин — больше предела, нужна декомпрессия (вкладка 2).</div>';
+      } else {
+        h += '<div class="hero bad"><div class="k">Режима без декомпрессии нет</div><div class="v">Неблагоприятных факторов: ' + nf + '</div></div>' +
+          '<div class="msg warn">При неблагоприятных факторах режим берётся на ' + shift + ' строк' + (shift === 1 ? 'у' : 'и') + ' ниже, а там уже есть остановки.</div>';
+      }
+      // Все глубины таблицы 5 в пределах допустимой глубины
+      var rowsHtml = depthKeys('t5').map(function (k) {
+        var l = noStopLimit(PVS.t5[k].r, shift);
+        var over = k > R.mod.max;
+        return '<tr' + (k === R.key ? ' class="cur"' : '') + '><td>' + k + NB + 'м</td><td>' + (over ? '—' : l ? 'до ' + l.e + NB + 'мин' : 'нет') + '</td><td>' + (over || !l ? '' : l.tr + NB + 'мин') + '</td></tr>';
+      }).join('');
+      h += '<div class="card"><h3>40' + NB + '% КАС, рабочие спуски</h3><table class="tbl"><thead><tr><th>Глубина</th><th>Без остановок</th><th>Подъём</th></tr></thead><tbody>' + rowsHtml + '</tbody></table>' +
+        '<p class="hint">Глубина и экспозиция округляются в большую сторону. Глубже 45' + NB + 'м 40' + NB + '% КАС не применяется.</p></div>';
+      $('ndOut').innerHTML = h;
+      return;
+    }
+    // Остальные таблицы: в ПВС режимов без остановок нет
+    var tname = R.t ? TABLE_INFO[R.t].split(' — ')[0] : 'этих условий';
+    h += '<div class="hero bad"><div class="k">По ПВС</div><div class="v">Режимов без декомпрессии нет</div></div>';
+    h += '<div class="msg warn">В ' + tname.replace('Таблица', 'таблице') + ' даже самый короткий режим требует остановок' + (R.t === 't1' || R.t === 't4' ? ' — минимум выдержка на 2' + NB + 'м' : '') + '.</div>';
+    if (R.rows && R.rows[shift]) {
+      var r = R.rows[shift], reg = regime(R.t, r, S.deco);
+      var sl = reg.stops.map(function (x) { return '<span>' + (R.t === 't6' ? fmt(x.d * 10, 0) : x.d) + NB + 'м · ' + x.m + (x.g === 'o2' ? ' O₂' : '') + '</span>'; }).join(' ');
+      h += '<div class="card"><h3>Самый короткий режим на ' + (R.viaEAD ? fmtIn(R.D) + NB + 'м <span class="hint">(по ЭВГ — строка ' + R.depthLabel + ')</span>' : R.depthLabel) + '</h3><div class="adj"><div class="it"><div class="h"><b>' + (r.e === null ? 'удлинённый' : 'до ' + r.e + NB + 'мин') + '</b><span class="tt">' + hmShort(reg.total) + '</span></div>' +
+        '<div class="tag">' + (shift ? 'с учётом неблагоприятных факторов' : 'основной режим') + '</div><div class="sl">переход ' + reg.tr + NB + 'мин · ' + sl + '</div></div></div></div>';
+    }
+    var nitrox = S.gas === 'kas' || S.gas === 'kvs';
+    h += '<div class="msg info">Режимы без остановок в ПВС есть только для 40' + NB + '% КАС при рабочих спусках на 21–45' + NB + 'м (таблица 5)' +
+      (nitrox && !is40(R.f) ? '. Выберите 40' + NB + '% на вкладке 1, чтобы их увидеть.' : S.gas === 'air' ? '.' : '.') + '</div>';
+    $('ndOut').innerHTML = h;
+  }
+
   function renderBar(R) {
     var bar = $('bar'), a, b, t = '', cls, ic;
     var firstErr = R.errs[1][0] || R.errs[2][0] || R.errs[4][0];
@@ -738,7 +813,7 @@
   function init() {
     // #t2&gas=kas&fo2=36 — открыть вкладку и задать поля (для проверки)
     location.hash.replace(/^#/, '').split('&').forEach(function (kv) {
-      var m = /^t([1-4])$/.exec(kv);
+      var m = /^t([1-5])$/.exec(kv);
       if (m) { S.tab = +m[1]; return; }
       var p = kv.split('=');
       if (p.length === 2 && typeof DEFAULTS[p[0]] === 'string') S[p[0]] = decodeURIComponent(p[1]);
@@ -787,6 +862,10 @@
       el.addEventListener('blur', function () { justFocused = false; });
     });
     render();
+    // Ширина подписей окончательна только после загрузки шрифтов и раскладки
+    window.addEventListener('load', revealTab);
+    window.addEventListener('resize', revealTab);
+    setTimeout(revealTab, 100);
   }
 
   init();
