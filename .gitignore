@@ -1,0 +1,17 @@
+# Сборка
+.gradle/
+build/
+app/build/
+*.apk
+*.aab
+
+# Локальные настройки
+local.properties
+.idea/
+*.iml
+.DS_Store
+
+# Ключи подписи — никогда не публиковать
+*.jks
+*.keystore
+keystore.properties
