@@ -199,6 +199,15 @@ footer{font-size:12.5px;color:var(--muted);line-height:1.5;margin-top:8px}
   .hero .v{font-size:40px}
   .stops li{grid-template-columns:56px minmax(0,1fr) auto}
 }
+.hero.ok{background:linear-gradient(135deg,#2f9e63,#1f7a4a);color:#06150d}
+.cond-hint{margin:8px 0 0}
+#conds{display:grid;grid-template-columns:1fr 1fr}
+.subnav{margin-bottom:12px}
+.stops .m .rt{display:block;font-size:11.5px;color:var(--muted);font-weight:500}
+.card-head .ttl{margin-bottom:2px}
+.badge.ok{background:var(--good-bg);color:var(--good)}
+details.more#factorsBox{margin-top:2px}
+footer{max-width:560px;margin:8px auto 0}
 .noscript{background:var(--err-bg);color:var(--err);padding:14px 16px}
 </style>
 </head>
@@ -211,9 +220,8 @@ footer{font-size:12.5px;color:var(--muted);line-height:1.5;margin-top:8px}
     <div class="tabs" role="tablist">
       <button class="tab" role="tab" id="tab1" data-tab="1" aria-controls="p1"><span class="n">1</span><span class="t">Смесь</span><i class="dot hidden"></i></button>
       <button class="tab" role="tab" id="tab2" data-tab="2" aria-controls="p2"><span class="n">2</span><span class="t">Декомпрессия</span><i class="dot hidden"></i></button>
-      <button class="tab" role="tab" id="tab3" data-tab="3" aria-controls="p3"><span class="n">3</span><span class="t">Приготовление</span><i class="dot hidden"></i></button>
-      <button class="tab" role="tab" id="tab4" data-tab="4" aria-controls="p4"><span class="n">4</span><span class="t">Смежные</span><i class="dot hidden"></i></button>
-      <button class="tab" role="tab" id="tab5" data-tab="5" aria-controls="p5"><span class="n">5</span><span class="t">Без декомпрессии</span><i class="dot hidden"></i></button>
+      <button class="tab" role="tab" id="tab3" data-tab="3" aria-controls="p3"><span class="n">3</span><span class="t">Смежные</span><i class="dot hidden"></i></button>
+      <button class="tab" role="tab" id="tab4" data-tab="4" aria-controls="p4"><span class="n">4</span><span class="t">Барокамера и смесь</span><i class="dot hidden"></i></button>
     </div>
   </div>
 </div>
@@ -222,7 +230,7 @@ footer{font-size:12.5px;color:var(--muted);line-height:1.5;margin-top:8px}
 
 <!-- 1. Смесь -->
 <section class="panel" id="p1" role="tabpanel" aria-labelledby="tab1">
-  <h2 class="ttl">Дыхательная смесь</h2>
+  <div class="card-head"><h2 class="ttl">Дыхательная смесь</h2><button type="button" class="link" id="reset">Сбросить всё</button></div>
   <p class="sub">Выберите газ — приложение покажет предельную глубину спуска.</p>
 
   <div class="card">
@@ -245,29 +253,27 @@ footer{font-size:12.5px;color:var(--muted);line-height:1.5;margin-top:8px}
 
 <!-- 2. Декомпрессия -->
 <section class="panel hidden" id="p2" role="tabpanel" aria-labelledby="tab2">
-  <h2 class="ttl">Режим декомпрессии</h2>
+  <h2 class="ttl">Декомпрессия</h2>
   <p class="sub" id="p2sub"></p>
 
-  <div class="card" id="condCard">
-    <h3>Условия спуска</h3>
-    <div class="opts" role="radiogroup" aria-label="Условия спуска" id="conds"></div>
-    <div id="intervalBox" class="hidden">
-      <div class="row-l"><span class="l">Интервал после прошлого спуска</span></div>
-      <div class="seg full" role="radiogroup" aria-label="Интервал" id="interval">
-        <button type="button" role="radio" data-v="30">30–119 мин</button>
-        <button type="button" role="radio" data-v="120">120–359 мин</button>
-        <button type="button" role="radio" data-v="360">360+ мин</button>
-      </div>
-    </div>
-    <div id="o2envBox" class="hidden">
-      <div class="seg full" role="radiogroup" aria-label="Где дышат кислородом" id="o2env">
-        <button type="button" role="radio" data-v="water">Под водой</button>
-        <button type="button" role="radio" data-v="chamber">В барокамере</button>
-      </div>
-    </div>
-  </div>
-
   <div class="card">
+    <div id="condBox">
+      <div class="seg full" role="radiogroup" aria-label="Условия спуска" id="conds">
+        <button type="button" role="radio" data-v="work">Рабочий</button>
+        <button type="button" role="radio" data-v="repeat">Повторный</button>
+        <button type="button" role="radio" data-v="emerg">Аварийный</button>
+        <button type="button" role="radio" data-v="alt">Высокогорье</button>
+      </div>
+      <p class="hint cond-hint" id="condHint"></p>
+      <div id="intervalBox" class="hidden">
+        <div class="row-l"><span class="l">После прошлого спуска прошло</span></div>
+        <div class="seg full" role="radiogroup" aria-label="Интервал" id="interval">
+          <button type="button" role="radio" data-v="30">30–119 мин</button>
+          <button type="button" role="radio" data-v="120">2–6 ч</button>
+          <button type="button" role="radio" data-v="360">6 ч и больше</button>
+        </div>
+      </div>
+    </div>
     <div class="field">
       <div class="lab"><label for="depth">Глубина спуска</label><span class="hint" id="depthHint"></span></div>
       <div class="inp" id="depthBox"><input id="depth" inputmode="decimal" enterkeyhint="done" autocomplete="off"><em>м</em></div>
@@ -278,117 +284,124 @@ footer{font-size:12.5px;color:var(--muted);line-height:1.5;margin-top:8px}
       <div class="inp" id="expBox"><input id="exp" inputmode="decimal" enterkeyhint="done" autocomplete="off"><em>мин</em></div>
       <div class="chips" id="expChips"></div>
     </div>
-  </div>
-
-  <div class="card" id="factorsCard">
-    <div class="card-head"><h3>Неблагоприятные факторы</h3><span class="hint" id="factorsSum"></span></div>
-    <div class="checks" id="factors">
-      <label class="check"><input type="checkbox" data-f="train"><span>Малотренированный водолаз<small>первоначальная отработка или прошлый спуск больше 60 суток назад</small></span></label>
-      <label class="check"><input type="checkbox" data-f="pred"><span>Предрасположен к декомпрессионной болезни<small>неоднократно болел при точном соблюдении режимов или неустойчив по тесту</small></span></label>
-      <label class="check"><input type="checkbox" data-f="cold"><span>Вода у поверхности ниже 10 °C</span></label>
-      <label class="check"><input type="checkbox" data-f="lowp"><span>Атмосферное давление ниже 745 мм рт. ст.</span></label>
-      <label class="check"><input type="checkbox" data-f="heavy"><span>Тяжёлая работа на грунте</span></label>
-    </div>
-  </div>
-
-  <div class="card" id="decoGasCard">
-    <div class="row-l"><span class="l">Дышать на остановках</span></div>
-    <div class="seg full" role="radiogroup" aria-label="Газ на остановках" id="deco"></div>
+    <details class="more" id="factorsBox">
+      <summary><span class="t" id="factorsTitle">Неблагоприятные факторы</span><span class="hint" id="factorsSum"></span></summary>
+      <div class="checks" id="factors">
+        <label class="check"><input type="checkbox" data-f="train"><span>Малотренированный водолаз<small>первоначальная отработка или прошлый спуск больше 60 суток назад</small></span></label>
+        <label class="check"><input type="checkbox" data-f="pred"><span>Предрасположен к декомпрессионной болезни<small>неоднократно болел при точном соблюдении режимов или неустойчив по тесту</small></span></label>
+        <label class="check"><input type="checkbox" data-f="cold"><span>Вода у поверхности ниже 10 °C</span></label>
+        <label class="check"><input type="checkbox" data-f="lowp"><span>Атмосферное давление ниже 745 мм рт. ст.</span></label>
+        <label class="check"><input type="checkbox" data-f="heavy"><span>Тяжёлая работа на грунте</span></label>
+      </div>
+    </details>
   </div>
 
   <div id="decoOut"></div>
-  <div class="next"><button type="button" class="btn" data-go="3">Приготовление смеси →</button></div>
+  <div class="next"><button type="button" class="btn" data-go="3">Смежные режимы →</button></div>
 </section>
 
-<!-- 3. Приготовление -->
+<!-- 3. Смежные режимы -->
 <section class="panel hidden" id="p3" role="tabpanel" aria-labelledby="tab3">
-  <h2 class="ttl">Приготовление смеси</h2>
+  <h2 class="ttl">Смежные режимы</h2>
   <p class="sub" id="p3sub"></p>
+  <div id="adjOut"></div>
+  <div class="next"><button type="button" class="btn" data-go="4">Барокамера и смесь →</button></div>
+</section>
 
-  <div id="prepNone"></div>
-  <div id="prepMain">
+<!-- 4. Барокамера и смесь -->
+<section class="panel hidden" id="p4" role="tabpanel" aria-labelledby="tab4">
+  <h2 class="ttl">Барокамера и смесь</h2>
+  <p class="sub">Всё, что делается на поверхности: декомпрессия и тренировки в барокамере, приготовление смеси.</p>
+  <div class="seg full subnav" role="radiogroup" aria-label="Раздел" id="sub4">
+    <button type="button" role="radio" data-v="cham">Барокамера</button>
+    <button type="button" role="radio" data-v="prep">Приготовление</button>
+  </div>
+
+  <div id="chamSec">
+    <div id="chamOut"></div>
     <div class="card">
-      <div class="row-l"><span class="l">Манометр в</span>
-        <div class="seg" role="radiogroup" aria-label="Единицы давления" id="units">
-          <button type="button" role="radio" data-u="mpa">МПа</button>
-          <button type="button" role="radio" data-u="kgf">кгс/см²</button>
-          <button type="button" role="radio" data-u="bar">бар</button>
-        </div>
+      <h3>Тренировочный спуск</h3>
+      <p class="hint" style="margin:0 0 8px">Таблица 6, дыхание воздухом. До 0,6 МПа в барокамере применяются рабочие режимы (вкладка 2): 10 м = 0,1 МПа.</p>
+      <div class="seg full" role="radiogroup" aria-label="Наибольшее давление" id="t6p">
+        <button type="button" role="radio" data-v="0.8">0,8 МПа (80 м)</button>
+        <button type="button" role="radio" data-v="1">1 МПа (100 м)</button>
       </div>
-      <div class="row-l sep" id="baseField">
-        <div class="lab"><span class="l">Основной газ</span><span class="hint" id="baseHint"></span></div>
-        <div class="seg" role="radiogroup" aria-label="Основной газ" id="base">
-          <button type="button" role="radio" data-v="n2">Азот</button>
-          <button type="button" role="radio" data-v="air">Воздух</button>
-        </div>
-      </div>
-      <div class="field">
-        <div class="lab"><label for="V">Объём баллона</label></div>
-        <div class="inp"><input id="V" inputmode="decimal" enterkeyhint="done" autocomplete="off"><em>л</em></div>
-        <div class="chips" data-for="V" data-vals="7 10 12 40"></div>
-      </div>
-      <div class="field">
-        <div class="lab"><label for="Pf">Давление готовой смеси</label><span class="hint">по манометру остывшего баллона</span></div>
-        <div class="inp"><input id="Pf" inputmode="decimal" enterkeyhint="done" autocomplete="off"><em class="pu">МПа</em></div>
-      </div>
-      <details class="more" id="moreRest">
-        <summary><span class="t">В баллоне что-то осталось?</span><span class="hint" id="restSum"></span></summary>
-        <div class="field">
-          <div class="lab"><label for="Pr">Остаток в баллоне</label></div>
-          <div class="inp"><input id="Pr" inputmode="decimal" enterkeyhint="done" autocomplete="off"><em class="pu">МПа</em></div>
-        </div>
-        <div class="field">
-          <div class="lab"><label for="FO2r">Кислорода в остатке</label><span class="hint">по газоанализатору</span></div>
-          <div class="inp"><input id="FO2r" inputmode="decimal" enterkeyhint="done" autocomplete="off"><em>%</em></div>
-        </div>
-      </details>
-      <details class="more" id="moreOther">
-        <summary><span class="t">Другие настройки</span><span class="hint" id="otherSum"></span></summary>
-        <div class="field">
-          <div class="lab"><label for="Fsrc">Чистота кислорода</label><span class="hint">медицинский — не менее 99,5 %</span></div>
-          <div class="inp"><input id="Fsrc" inputmode="decimal" enterkeyhint="done" autocomplete="off"><em>%</em></div>
-        </div>
-        <div class="field">
-          <div class="lab"><label for="Patm">Атмосферное давление</label></div>
-          <div class="inp"><input id="Patm" inputmode="decimal" enterkeyhint="done" autocomplete="off"><em>мм</em></div>
-        </div>
-      </details>
+      <div id="t6Out"></div>
     </div>
+    <div class="card" id="o2cCard"></div>
+  </div>
 
-    <div id="prepOut"></div>
-
-    <div class="card" id="revCard">
-      <h3 id="revTitle">Основной газ уже в баллоне?</h3>
-      <div class="field">
-        <div class="lab"><label for="rP" id="revLabel">Манометр сейчас показывает</label><span class="hint">когда баллон остыл</span></div>
-        <div class="inp"><input id="rP" inputmode="decimal" enterkeyhint="done" autocomplete="off" placeholder="—"><em class="pu">МПа</em></div>
+  <div id="prepSec">
+    <p class="hint" id="p4prepSub" style="margin:0 0 12px"></p>
+    <div id="prepNone"></div>
+    <div id="prepMain">
+      <div class="card">
+        <div class="row-l"><span class="l">Манометр в</span>
+          <div class="seg" role="radiogroup" aria-label="Единицы давления" id="units">
+            <button type="button" role="radio" data-u="mpa">МПа</button>
+            <button type="button" role="radio" data-u="kgf">кгс/см²</button>
+            <button type="button" role="radio" data-u="bar">бар</button>
+          </div>
+        </div>
+        <div class="row-l sep" id="baseField">
+          <div class="lab"><span class="l">Основной газ</span><span class="hint" id="baseHint"></span></div>
+          <div class="seg" role="radiogroup" aria-label="Основной газ" id="base">
+            <button type="button" role="radio" data-v="n2">Азот</button>
+            <button type="button" role="radio" data-v="air">Воздух</button>
+          </div>
+        </div>
+        <div class="field">
+          <div class="lab"><label for="V">Объём баллона</label></div>
+          <div class="inp"><input id="V" inputmode="decimal" enterkeyhint="done" autocomplete="off"><em>л</em></div>
+          <div class="chips" data-for="V" data-vals="7 10 12 40"></div>
+        </div>
+        <div class="field">
+          <div class="lab"><label for="Pf">Давление готовой смеси</label><span class="hint">по манометру остывшего баллона</span></div>
+          <div class="inp"><input id="Pf" inputmode="decimal" enterkeyhint="done" autocomplete="off"><em class="pu">МПа</em></div>
+        </div>
+        <details class="more" id="moreRest">
+          <summary><span class="t">В баллоне что-то осталось?</span><span class="hint" id="restSum"></span></summary>
+          <div class="field">
+            <div class="lab"><label for="Pr">Остаток в баллоне</label></div>
+            <div class="inp"><input id="Pr" inputmode="decimal" enterkeyhint="done" autocomplete="off"><em class="pu">МПа</em></div>
+          </div>
+          <div class="field">
+            <div class="lab"><label for="FO2r">Кислорода в остатке</label><span class="hint">по газоанализатору</span></div>
+            <div class="inp"><input id="FO2r" inputmode="decimal" enterkeyhint="done" autocomplete="off"><em>%</em></div>
+          </div>
+        </details>
+        <details class="more" id="moreOther">
+          <summary><span class="t">Другие настройки</span><span class="hint" id="otherSum"></span></summary>
+          <div class="field">
+            <div class="lab"><label for="Fsrc">Чистота кислорода</label><span class="hint">медицинский — не менее 99,5 %</span></div>
+            <div class="inp"><input id="Fsrc" inputmode="decimal" enterkeyhint="done" autocomplete="off"><em>%</em></div>
+          </div>
+          <div class="field">
+            <div class="lab"><label for="Patm">Атмосферное давление</label></div>
+            <div class="inp"><input id="Patm" inputmode="decimal" enterkeyhint="done" autocomplete="off"><em>мм</em></div>
+          </div>
+        </details>
       </div>
-      <div id="revOut" class="rev-out"></div>
+
+      <div id="prepOut"></div>
+
+      <div class="card" id="revCard">
+        <h3 id="revTitle">Основной газ уже в баллоне?</h3>
+        <div class="field">
+          <div class="lab"><label for="rP" id="revLabel">Манометр сейчас показывает</label><span class="hint">когда баллон остыл</span></div>
+          <div class="inp"><input id="rP" inputmode="decimal" enterkeyhint="done" autocomplete="off" placeholder="—"><em class="pu">МПа</em></div>
+        </div>
+        <div id="revOut" class="rev-out"></div>
+      </div>
     </div>
   </div>
-  <div class="next"><button type="button" class="btn" data-go="4">Смежные режимы →</button></div>
-</section>
-
-<!-- 4. Смежные режимы -->
-<section class="panel hidden" id="p4" role="tabpanel" aria-labelledby="tab4">
-  <h2 class="ttl">Смежные режимы</h2>
-  <p class="sub" id="p4sub"></p>
-  <div id="adjOut"></div>
-  <div class="next"><button type="button" class="btn" data-go="5">Без декомпрессии →</button></div>
-</section>
-
-<!-- 5. Без декомпрессии -->
-<section class="panel hidden" id="p5" role="tabpanel" aria-labelledby="tab5">
-  <h2 class="ttl">Без декомпрессии</h2>
-  <p class="sub" id="p5sub"></p>
-  <div id="ndOut"></div>
 </section>
 
 <footer>
-  Таблицы — ПВС ВМФ-2002, приложение 4 (электронная копия). Найденные в копии опечатки исправлены
-  и помечены значком ⚠; в спорных случаях принят более длинный вариант. Приложение — вспомогательный
-  инструмент и не заменяет водолазного специалиста и врача-спецфизиолога. Смесь перед спуском
-  обязательно проверяется газоанализатором.
+  Таблицы — ПВС ВМФ-2002 (электронная копия). Найденные в копии опечатки исправлены и помечены
+  значком ⚠; в спорных случаях принят более длинный вариант. Режимы для смесей, которых нет в ПВС,
+  рассчитаны по эквиваленту и помечены. Приложение — вспомогательный инструмент и не заменяет
+  водолазного специалиста и врача-спецфизиолога. Смесь перед спуском обязательно проверяется газоанализатором.
 </footer>
 
 </div>
